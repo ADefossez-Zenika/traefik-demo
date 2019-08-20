@@ -1,0 +1,103 @@
+version: "3"
+services:
+
+#TRAEFIK
+    traefik:
+        image: traefik:1.7
+        restart: always
+        ports:
+          - "80:80"
+          - "443:443"
+        volumes:
+          - "./config/traefik/traefik.toml:/etc/traefik/traefik.toml"
+          - "/var/run/docker.sock:/var/run/docker.sock"
+          - "acme-json:/tmp/acme"
+        container_name: traefik
+        labels:
+            traefik.frontend.rule: "Host:traefik.docker.localhost"
+            traefik.port: 8090
+
+
+#DATABASE
+    db:
+      image: mariadb:10.3
+      volumes:
+        - "db-data:/var/lib/mysql"
+        - "./config/database:/etc/mysql/conf.d"
+      environment:
+        - MYSQL_USER=${MYSQL_USER}
+        - MYSQL_DATABASE=${MYSQL_DATABASE}
+        - MYSQL_PASSWORD=${MYSQL_PASSWORD} 
+      labels:
+        - "traefik.enable=false"
+
+#WIKI
+    wikiDefossez:
+        image: bitnami/dokuwiki:latest
+        volumes:
+          - "wikidef:/bitnami"
+        environment:
+          - DOKUWIKI_USERNAME=${DOKUWIKI_USERNAME}
+          - DOKUWIKI_FULL_NAME=${DOKUWIKI_FULL_NAME}
+          - DOKUWIKI_PASSWORD=${DOKUWIKI_PASSWORD}
+          - DOKUWIKI_EMAIL=${DOKUWIKI_EMAIL}
+          - DOKUWIKI_WIKI_NAME=${DOKUWIKI_WIKI_NAME}
+        labels:
+          - "traefik.backend=wikiDefossez"
+          - "traefik.frontend.rule=Host:wiki.docker.localhost"
+          - "traefik.port=80"
+          - "traefik.protocol=http"
+
+    blogTech:
+      image: registry.gitlab.com/adefossez/web/blogtech:latest
+      volumes:
+        - "tech_wp-content:/var/www/html/"
+      environment:
+        - WORDPRESS_DB_HOST=db
+        - WORDPRESS_DB_USER=${MYSQL_USER}
+        - WORDPRESS_DB_NAME=${MYSQL_DATABASE}
+        - WORDPRESS_TABLE_PREFIX=TEC_
+        - WORDPRESS_DB_PASSWORD=${MYSQL_PASSWORD}
+      labels:
+        - "traefik.frontend.rule=Host:tech.docker.localhost"
+        - "traefik.backend=blogTech"
+        - "traefik.port=80"
+        - "traefik.protocol=http"
+
+
+    blogPerso:
+      image: wordpress:5.2
+      volumes:
+        - "./config/wordpress/perso/themes/:/var/www/html/wp-content/themes/"
+        - "./config/wordpress/perso/plugins/:/var/www/html/wp-content/plugins/"
+        - "perso_wp-content:/var/www/html/wp-content"
+      environment:
+        - WORDPRESS_DB_HOST=db
+        - WORDPRESS_DB_USER=${MYSQL_USER}
+        - WORDPRESS_DB_NAME=${MYSQL_DATABASE}
+        - WORDPRESS_TABLE_PREFIX=PER_
+        - WORDPRESS_DB_PASSWORD=${MYSQL_PASSWORD}
+      labels:
+        - "traefik.frontend.rule=Host:blog.docker.localhost"
+        - "traefik.backend=blogPerso"
+        - "traefik.port=80"
+        - "traefik.protocol=http"
+
+    phpmyadmin:
+      image: phpmyadmin/phpmyadmin:4.7 
+      environment:
+        - PMA_ARBITRARY=1 
+      labels:
+        - "traefik.frontend.rule=Host:phpmyadmin.docker.localhost"
+        - "traefik.backend=phpmyadmin"
+        - "traefik.port=80"
+        - "traefik.protocol=http"
+  
+
+
+volumes:
+  db-data:
+  wikidef:
+  acme-json:
+  perso_wp-content:
+  tech_wp-content:
