@@ -1,0 +1,2 @@
+compose/logs/*
+!compose/logs/empty.file
