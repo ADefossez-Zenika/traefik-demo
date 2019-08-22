@@ -39,7 +39,7 @@ entryPoint = "http"
 #
 # Optional
 #
-# [traefikLog]
+[traefikLog]
 
 # Sets the filepath for the traefik log. If not specified, stdout will be used.
 # Intermediate directories are created if necessary.
@@ -47,7 +47,7 @@ entryPoint = "http"
 # Optional
 # Default: os.Stdout
 #
-# filePath = "log/traefik.log"
+filePath = "/logs/traefik.log"
 
 # Format is either "json" or "common".
 #
@@ -146,3 +146,26 @@ entryPoint = "http"
 # Default: true
 #
 # exposedByDefault = true
+
+
+[file]
+
+# Backends
+[backends]
+  [backends.nginx]
+    [backends.nginx.servers]
+      [backends.nginx.servers.server0]
+        url = "http://51.75.246.163:42837"
+        weight = 1
+# Frontends
+[frontends]
+
+  [frontends.nginx]
+    entryPoints = ["http", "https"]
+    backend = "nginx"
+    passHostHeader = true
+    priority = 42
+
+    [frontends.nginx.routes]
+      [frontends.nginx.routes.route0]
+        rule = "Host:nginx.docker.localhost"
