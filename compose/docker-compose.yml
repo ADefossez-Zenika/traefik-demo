@@ -94,11 +94,62 @@ services:
         traefik.port: 80
         traefik.protocol: "http"
   
+    elasticsearch:
+      image: docker.elastic.co/elasticsearch/elasticsearch:7.3.0
+      container_name: elasticsearch
+      environment:
+        - discovery.type=single-node
+       # - bootstrap.memory_lock=true
+       # - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      ulimits:
+        memlock:
+          soft: -1
+          hard: -1
+      volumes:
+        - esdata01:/usr/share/elasticsearch/data
+      labels:
+        traefik.enable: false
 
+
+    logstash:
+      image: docker.elastic.co/logstash/logstash:7.3.0
+      volumes:
+        - ./config/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+        - ./config/logstash/pipeline:/usr/share/logstash/pipeline:ro
+        - ./logs/:/work/
+      environment:
+        LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      depends_on:
+        - elasticsearch
+      labels:
+        traefik.enable: false
+
+    kibana:
+      image: docker.elastic.co/kibana/kibana:7.3.0
+      volumes:
+        - ./config/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+      depends_on:
+        - elasticsearch
+      labels:
+        traefik.frontend.rule: "Host:kibana.docker.localhost"
+        traefik.backend: "kibana"
+        traefik.port: 5601
+        traefik.protocol: "http"
+
+    cerebro:
+      image: lmenezes/cerebro
+      depends_on:
+        - elasticsearch
+      labels:
+        traefik.frontend.rule: "Host:cerebro.docker.localhost"
+        traefik.backend: "cerebro"
+        traefik.port: 9000
+        traefik.protocol: "http"
 
 volumes:
   db-data:
   wikidef:
   acme-json:
   perso_wp-content:
-  tech_wp-content:
+  tech_wp-content:    
+  esdata01:
