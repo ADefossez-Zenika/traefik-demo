@@ -26,6 +26,7 @@ services:
         - "db-data:/var/lib/mysql"
         - "./config/database:/etc/mysql/conf.d"
       environment:
+        - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
         - MYSQL_USER=${MYSQL_USER}
         - MYSQL_DATABASE=${MYSQL_DATABASE}
         - MYSQL_PASSWORD=${MYSQL_PASSWORD} 
