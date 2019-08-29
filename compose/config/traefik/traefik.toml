@@ -19,7 +19,7 @@ defaultEntryPoints = ["http", "https"]
     address = ":8090"
 
 [acme]
-email = "aymeric.defossez@gmail.com"
+email = "YOUREMAIL"
 storage = "/tmp/acme/acme.json"
 entryPoint = "https"
 onHostRule = true

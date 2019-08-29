@@ -1,2 +1,4 @@
 compose/logs/*
 !compose/logs/empty.file
+.vscode/
+
