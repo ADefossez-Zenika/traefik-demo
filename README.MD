@@ -10,6 +10,10 @@
 
 Feel free to play with traefik config file to discover.
 
+## Simulate Nginx on a remote server 
+
+    docker run -p42837:80 -d nginx
+
 ## Urls availables
 
 - nginx.docker.localhost (file)
