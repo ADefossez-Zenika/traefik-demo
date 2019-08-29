@@ -156,7 +156,7 @@ format = "json"
   [backends.nginx]
     [backends.nginx.servers]
       [backends.nginx.servers.server0]
-        url = "http://51.75.246.163:42837"
+        url = "http://127.0.0.1:42837"
         weight = 1
 # Frontends
 [frontends]
